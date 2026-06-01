@@ -1,4 +1,4 @@
-import type { CellState, Grid } from './types';
+import type { Grid } from './types';
 import { isDecided, solutionState } from './grid';
 import {
   allCellsDecided,
