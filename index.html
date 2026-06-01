@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Hitori" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta
+      name="description"
+      content="Mobile-first Hitori with four grid sizes, help, undo, reset, and mistake counting."
+    />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <title>Simple Hitori</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="header">
+        <h1 class="title">Simple Hitori</h1>
+        <div class="status-bar">
+          <span id="mistakes" class="mistakes" aria-live="polite">Mistakes: 0</span>
+          <span id="puzzle-id" class="puzzle-id"></span>
+        </div>
+      </header>
+
+      <section class="controls" aria-label="Game controls">
+        <label class="difficulty-label">
+          <span class="sr-only">Difficulty</span>
+          <select id="difficulty" class="difficulty-select">
+            <option value="easy">Easy (5×5)</option>
+            <option value="medium">Medium (6×6)</option>
+            <option value="hard">Hard (8×8)</option>
+            <option value="expert">Expert (12×12)</option>
+          </select>
+        </label>
+        <button type="button" id="help" class="btn">Help</button>
+        <button type="button" id="reset" class="btn">Reset</button>
+        <button type="button" id="new-game" class="btn btn-primary">New Game</button>
+      </section>
+
+      <div id="win-banner" class="win-banner hidden" role="status">
+        <strong>You win!</strong>
+        <span id="win-banner-detail" class="win-banner-detail"></span>
+      </div>
+
+      <main class="game-area">
+        <div
+          id="board"
+          class="board"
+          role="grid"
+          aria-label="Hitori board"
+        ></div>
+
+        <aside class="sidebar">
+          <div class="goal-panel" aria-live="polite">
+            <p class="goal-label">Your goal</p>
+            <p id="goal-status" class="goal-status">Shade duplicate numbers</p>
+            <p id="goal-detail" class="goal-detail">
+              When the same number appears twice in a row or column, tap one copy until it turns
+              <strong>black</strong> (shaded). You win when all three rules pass — see Help.
+            </p>
+          </div>
+          <p class="hint">
+            Tap a cell: undecided → <strong>white ring</strong> (keep) → <strong>black</strong> (shade) → clear.
+            Fixing a wrong shade on the next tap removes the mistake.
+          </p>
+          <div class="action-row">
+            <button type="button" id="undo" class="btn" disabled>Undo</button>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="footer">
+        <span id="puzzle-id-footer" class="puzzle-id"></span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
