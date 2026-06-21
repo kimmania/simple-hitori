@@ -7,6 +7,7 @@ type BoardElements = {
 };
 
 export function createBoard(container: HTMLElement): BoardElements {
+  container.tabIndex = 0;
   return { container, cells: [] };
 }
 
@@ -73,8 +74,17 @@ export function renderBoard(board: BoardElements, state: GameState): void {
       cellEl.classList.toggle('conflict', conflicts.has(key));
       cellEl.classList.toggle('wrong', wrong.has(key));
 
+      const marking =
+        cellData.state === 'black' ? 'shaded' : cellData.state === 'white' ? 'kept' : 'undecided';
       valueEl.textContent = String(cellData.value);
-      cellEl.setAttribute('aria-label', `Row ${row + 1} column ${col + 1}, ${cellData.value}`);
+      cellEl.setAttribute(
+        'aria-label',
+        `Row ${row + 1} column ${col + 1}, ${cellData.value}, ${marking}`,
+      );
+      cellEl.setAttribute(
+        'aria-selected',
+        String(state.selected?.row === row && state.selected?.col === col),
+      );
     }
   }
 }

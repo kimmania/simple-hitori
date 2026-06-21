@@ -9,7 +9,8 @@ export async function loadPuzzles(difficulty: Difficulty): Promise<Puzzle[]> {
   const cached = puzzleCache.get(difficulty);
   if (cached) return cached;
 
-  const response = await fetch(`${import.meta.env.BASE_URL}puzzles/${difficulty}.json`);
+  const stamp = typeof __PUZZLE_STAMP__ !== 'undefined' ? `?v=${__PUZZLE_STAMP__}` : '';
+  const response = await fetch(`${import.meta.env.BASE_URL}puzzles/${difficulty}.json${stamp}`);
   if (!response.ok) {
     throw new Error(`Failed to load puzzles for ${difficulty}`);
   }

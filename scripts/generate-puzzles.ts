@@ -123,6 +123,9 @@ function generateOne(
     const values = fillFromPattern(size, blacks);
     const shades = blacks.map((row) => row.map((b) => b as boolean | null));
 
+    // For large grids, full uniqueness solving is prohibitively slow.
+    // The generated pattern is accepted as the solution; puzzles are valid
+    // but not guaranteed to have a unique solution.
     if (size >= 10) {
       if (!isValidSolution(values, size, shades)) continue;
       return { values, solution: solutionToString(blacks) };
@@ -158,8 +161,7 @@ function generateForDifficulty(difficulty: Difficulty): Puzzle[] {
   const seen = new Set<string>();
 
   for (const [index, seed] of SEEDS.entries()) {
-    if (seed.difficulty !== difficulty && seed.values.length !== size) continue;
-    if (seed.values.length !== size) continue;
+    if (seed.difficulty !== difficulty || seed.values.length !== size) continue;
     const puzzle = puzzleFromSeed(difficulty, seed.values, index);
     if (!puzzle || seen.has(puzzle.solution)) continue;
     seen.add(puzzle.solution);

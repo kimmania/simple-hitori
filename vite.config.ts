@@ -1,8 +1,13 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const buildStamp = process.env.GITHUB_SHA?.slice(0, 7) || Date.now().toString(36);
+
 export default defineConfig({
   base: '/simple-hitori/',
+  define: {
+    __PUZZLE_STAMP__: JSON.stringify(buildStamp),
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -43,7 +48,7 @@ export default defineConfig({
         navigateFallback: '/simple-hitori/index.html',
         runtimeCaching: [
           {
-            urlPattern: ({ url }) =>
+            urlPattern: ({ url }: { url: URL }) =>
               url.pathname.includes('/puzzles/') && url.pathname.endsWith('.json'),
             handler: 'CacheFirst',
             options: {

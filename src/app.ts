@@ -21,7 +21,8 @@ export class HitoriApp {
   private state: GameState | null = null;
   private board = createBoard(document.getElementById('board')!);
   private loading = false;
-  private undoStack: HistorySnapshot[] = [];
+  // Intentionally single-step: we only preserve the state immediately before the latest move.
+  private previousSnapshot: HistorySnapshot | null = null;
 
   async init(): Promise<void> {
     bindBoardClick(this.board, (row, col) => this.handleCell(row, col));
@@ -74,32 +75,41 @@ export class HitoriApp {
   }
 
   private clearUndo(): void {
-    this.undoStack = [];
+    this.previousSnapshot = null;
     setUndoEnabled(false);
   }
 
-  private recordUndoPoint(): void {
+  private stashSnapshot(): void {
     if (!this.state || this.state.status === 'won') return;
-    this.undoStack = [captureSnapshot(this.state)];
+    this.previousSnapshot = captureSnapshot(this.state);
   }
 
   private handleCell(row: number, col: number): void {
     if (!this.state || this.state.status === 'won') return;
 
-    this.recordUndoPoint();
+    this.stashSnapshot();
     this.state.selected = { row, col };
     toggleCell(this.state, row, col);
     this.refresh();
   }
 
   private handleUndo(): void {
-    if (!this.state || this.undoStack.length === 0) return;
-    const snapshot = this.undoStack.pop()!;
-    applySnapshot(this.state, snapshot);
+    if (!this.state || !this.previousSnapshot) return;
+    applySnapshot(this.state, this.previousSnapshot);
+    this.previousSnapshot = null;
     this.refresh();
   }
 
   private handleKeydown(event: KeyboardEvent): void {
+    // Help dialog takes precedence; still let Escape close it
+    if (document.querySelector('#help-dialog[open]')) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeHelp();
+      }
+      return;
+    }
+
     if (!this.state || this.state.status === 'won') return;
 
     const target = event.target as HTMLElement;
@@ -111,16 +121,26 @@ export class HitoriApp {
       return;
     }
 
-    if (event.key === 'Escape') {
-      closeHelp();
+    const selected = this.state.selected;
+    let row = selected?.row ?? 0;
+    let col = selected?.col ?? 0;
+    const max = this.state.grid.size - 1;
+
+    if (!selected) {
+      const isNav = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Enter'].includes(
+        event.key,
+      );
+      if (!isNav) return;
+      event.preventDefault();
+      this.state.selected = { row, col };
+      if (event.key === ' ' || event.key === 'Enter') {
+        this.handleCell(row, col);
+      } else {
+        this.refresh();
+      }
       return;
     }
 
-    const selected = this.state.selected;
-    if (!selected) return;
-
-    let { row, col } = selected;
-    const max = this.state.grid.size - 1;
     switch (event.key) {
       case 'ArrowUp':
         row = Math.max(0, row - 1);
@@ -154,7 +174,7 @@ export class HitoriApp {
     renderBoard(this.board, this.state);
     updateMistakes(this.state.mistakes);
     updatePuzzleId(this.state.puzzleId);
-    setUndoEnabled(this.undoStack.length > 0);
+    setUndoEnabled(this.previousSnapshot !== null);
 
     const playStatus = getPlayStatus(this.state.grid, this.state.solution);
     if (playStatus.won && this.state.status !== 'won') {

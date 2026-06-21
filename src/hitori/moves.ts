@@ -1,7 +1,6 @@
 import type { CellState, GameState } from './types';
 import { cycleCellState, solutionState } from './grid';
-import { getViolationCells } from './rules';
-import { hasNewRuleViolation, isSolved } from './validate';
+import { isSolved } from './validate';
 
 function isWrongMarking(
   solution: boolean[][],
@@ -17,7 +16,6 @@ export function toggleCell(state: GameState, row: number, col: number): void {
   if (state.status === 'won') return;
 
   const cell = state.grid.cells[row][col];
-  const beforeViolations = getViolationCells(state.grid);
   const prev = cell.state;
   const next = cycleCellState(prev);
 
@@ -28,8 +26,6 @@ export function toggleCell(state: GameState, row: number, col: number): void {
   }
 
   if (isWrongMarking(state.solution, row, col, next)) {
-    state.mistakes += 1;
-  } else if (next !== 'empty' && hasNewRuleViolation(state.grid, beforeViolations)) {
     state.mistakes += 1;
   }
 
