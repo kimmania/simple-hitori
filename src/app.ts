@@ -34,6 +34,8 @@ export class HitoriApp {
       onDifficultyChange: () => void this.newGame(),
     });
 
+    document.getElementById('play-again')?.addEventListener('click', () => void this.newGame());
+
     document.addEventListener('keydown', (event) => this.handleKeydown(event));
 
     const saved = loadSavedGame();
